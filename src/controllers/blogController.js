@@ -24,7 +24,7 @@ const createBlog = async function(req,res){
             });
         }
         if(!mongoose.Types.ObjectId.isValid(data.authorId)){
-            return res.status(404).send({
+            return res.status(400).send({
                 status: false,
                 message : 'blog author id is not valid'
             });
@@ -55,6 +55,13 @@ const createBlog = async function(req,res){
             });
         }
 
+        if(author.authorId !== data.authorId) {
+            return res.status(404).send({
+                status: false,
+                message : 'Wrong authorId'
+            });
+        }
+
         const blog = await Blog.create(data);
         res.status(201).send({
             status: true,
@@ -72,7 +79,7 @@ const createBlog = async function(req,res){
 
 const blogs = async function (req, res) {
     try {
-        const filterQuery = {isDeleted: false, deletedAt: null, isPublished: true}
+        const filterQuery = {isDeleted: false, isPublished: true}
         
         const {authorId, category, tags, subcategory} = req.query;
 
@@ -116,8 +123,7 @@ const blogs = async function (req, res) {
 
 const updateBlog = async function (req, res) {
     try {
-        const params = req.params
-        const blogId = params.blogId
+        const blogId = req.params.blogId
         const authorIdFromToken = req.authorId
         
         if(!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -155,7 +161,7 @@ const updateBlog = async function (req, res) {
         const updatedBlogData = {}
 
         if(title) {
-            if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$set')) {} updatedBlogData['$set'] = {}
+            if(!Object.prototype.hasOwnProperty.call(updatedBlogData, '$set')) updatedBlogData['$set'] = {}
 
             updatedBlogData['$set']['title'] = title
         }
@@ -278,7 +284,7 @@ const deleteBlogByParams = async function (req, res) {
         const authorIdFromToken = req.authorId
 
         if(!mongoose.Types.ObjectId.isValid(authorIdFromToken)) {
-            return res.status(400).send({
+            return res.status(404).send({
                 status: false, 
                 message: `${authorIdFromToken} is not a valid token id`
             })
