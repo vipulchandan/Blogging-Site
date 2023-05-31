@@ -120,6 +120,7 @@ const login = async (req,res)=>{
         const token = jwt.sign(payload, secret, options);
 
         res.setHeader("x-api-key", token);
+        
         res.status(200).json({
             status:true,
             message : 'Author logged in successfully',
